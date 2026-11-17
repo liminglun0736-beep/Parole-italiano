@@ -4,7 +4,7 @@ const PlanCore = (() => {
   const previousDate = key => { const [y,m,d]=key.split('-').map(Number); return dateKey(new Date(y,m-1,d-1,12)); };
   const wordId = w => [w.book,w.level,w.word].join('|');
   const defaults = {newGoal:20,level:'A1'};
-  const validSettings = s => s && Number.isInteger(s.newGoal) && s.newGoal>=5 && s.newGoal<=200 && ['all','A1','A2','B1','B2'].includes(s.level);
+  const validSettings = s => s && Number.isInteger(s.newGoal) && s.newGoal>=5 && s.newGoal<=200 && ['all','A1','A2','B1','B2','ungraded'].includes(s.level);
   function migrate(state) {
     state.settings=validSettings(state.settings)?state.settings:{...defaults};
     state.studyDays=state.studyDays && typeof state.studyDays==='object'&&!Array.isArray(state.studyDays)?state.studyDays:{};
@@ -19,7 +19,7 @@ const PlanCore = (() => {
     const d=ensureDay(state,words,now), scope=words.filter(w=>d.settings.level==='all'||w.level===d.settings.level),ids=new Set(scope.map(wordId));
     const newDone=d.newIds.filter(k=>ids.has(k)).length;
     const newTarget=Math.min(d.settings.newGoal,scope.filter(w=>!state.progress[wordId(w)]).length+newDone);
-    const reviewIds=d.dueAtStart.filter(k=>ids.has(k)),reviewDone=reviewIds.filter(k=>d.reviewedIds.includes(k)).length;
+    const reviewed=new Set(d.reviewedIds),reviewIds=d.dueAtStart.filter(k=>ids.has(k)),reviewDone=reviewIds.filter(k=>reviewed.has(k)).length;
     const total=newTarget+reviewIds.length,done=Math.min(newDone,newTarget)+reviewDone;
     return {newDone,newTarget,reviewDone,reviewTarget:reviewIds.length,done,total,percent:total?Math.min(100,Math.round(done/total*100)):0,complete:newDone>=newTarget&&reviewDone>=reviewIds.length&&[...d.newIds,...d.reviewedIds].some(k=>ids.has(k)),scope,day:d};
   }
@@ -35,7 +35,7 @@ const PlanCore = (() => {
   function validateDays(days) {
     if(!days||typeof days!=='object'||Array.isArray(days))throw Error('打卡备份格式无效');
     const clean={};for(const [k,d] of Object.entries(days)){const [y,m,n]=k.split('-').map(Number);if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||dateKey(new Date(y,m-1,n,12))!==k||!d||!validSettings(d.settings)||!Number.isInteger(d.attempts)||d.attempts<0||!(d.checkedAt===null||(Number.isFinite(d.checkedAt)&&d.checkedAt>0)))throw Error('每日计划记录无效');
-      for(const field of ['newIds','reviewedIds','dueAtStart'])if(!Array.isArray(d[field])||d[field].some(x=>typeof x!=='string')||d[field].length>30000)throw Error('每日词条记录无效');
+      for(const field of ['newIds','reviewedIds','dueAtStart'])if(!Array.isArray(d[field])||d[field].some(x=>typeof x!=='string')||d[field].length>500000)throw Error('每日词条记录无效');
       clean[k]={...d,newIds:[...new Set(d.newIds)],reviewedIds:[...new Set(d.reviewedIds)],dueAtStart:[...new Set(d.dueAtStart)]};
     }return clean;
   }

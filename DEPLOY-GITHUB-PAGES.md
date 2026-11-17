@@ -1,6 +1,6 @@
 # 把 Parola 发布到 GitHub Pages（所有人可访问）
 
-Parola 是纯静态网站，支持 A1–B2 词库、间隔复习、每日新词计划、打卡、朗读和备份。访问者无需 GitHub 或 ChatGPT 账号；只有发布者需要 GitHub 账号。学习记录保存在访问者自己的浏览器中，不会上传到 GitHub。
+Parola 是纯静态网站，支持 A1–B2 与未分级词库、间隔复习、每日新词计划、打卡、朗读和备份。访问者无需 GitHub 或 ChatGPT 账号；只有发布者需要 GitHub 账号。学习记录保存在访问者自己的浏览器中，不会上传到 GitHub。
 
 ## 方法一：直接上传（最简单，使用 `parola-github-pages.zip`）
 
@@ -38,6 +38,17 @@ Parola 是纯静态网站，支持 A1–B2 词库、间隔复习、每日新词�
 
 不要把个人学习备份上传到公开 GitHub 仓库。在网站页面中导入即可，数据只保存在当前浏览器。不同设备和浏览器需要分别导入；同一个浏览器内的不同 GitHub Pages 仓库使用独立进度。
 
+## 导入完整词典（新版）
+
+更新网站时请一并上传新增的 `storage.js` 和其他网页文件；使用新版完整 ZIP 覆盖即可。词典仅在当前浏览器的 IndexedDB 中保存，不需要上传到公开 GitHub 仓库。首次打开新版会自动迁移旧版学习记录并保留原始副本；请等待「正在读取 / 保存」提示结束再关闭页面。
+
+1. MDX 先转换成网站支持的 JSON 词表。没有 CEFR 等级的词条使用 `level: "ungraded"`，网站显示为「未分级」。
+2. 在「我的词库 → 导入词表 / 恢复备份」依次选择 JSON 分批文件。每批最多 30,000 条 / 20 MB；完整释义不会截断。只有本地保存完成才显示导入成功。
+3. 在「记忆计划」选择「未分级」或「全部等级」后学习。词典提供释义，但不会自动获得 A1–B2 官方分级。
+4. 多批导入后可导出完整学习备份。恢复本站备份允许最多 500,000 条 / 256 MiB，包含长释义、进度和打卡。
+
+如果浏览器提示空间不足，原词库保留，本次导入不会显示成功。可换用支持 IndexedDB 且空间充足的浏览器。清理浏览器数据会删除本地词库，请定期把备份另存到自己的设备。
+
 ## 词库与使用说明
 
 - 当前共 2,956 条学习记录：Espresso Plus A1/A2 共 2,371 条；开放词典核实的 B1/B2 共 585 条。
@@ -49,6 +60,6 @@ Parola 是纯静态网站，支持 A1–B2 词库、间隔复习、每日新词�
 
 ## 验证与官方说明
 
-源码检查：`node tests/pages.cjs`、`node tests/plan.cjs`、`node tests/app.cjs`。这次已完成静态路径和功能逻辑检查，未在真实 GitHub 仓库中运行部署；GitHub Pages 的线上地址以部署成功后的返回值为准。
+源码检查：`node tests/pages.cjs`、`node tests/plan.cjs`、`node tests/app.cjs`、`node tests/storage.cjs`、`node tests/import.cjs`、`node tests/pages-storage.cjs`。这次已完成静态路径和功能逻辑检查，未在真实 GitHub 仓库中运行部署；GitHub Pages 的线上地址以部署成功后的返回值为准。
 
 GitHub 官方说明：[选择 Pages 发布来源](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) · [使用 Actions 发布](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
